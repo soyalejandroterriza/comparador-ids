@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador de IDs cruzados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos básicos para la barra de desplazamiento en la caja de resultados */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen p-6 flex flex-col items-center">
+
+    <div class="w-full max-w-4xl bg-white rounded-xl shadow-sm border border-gray-200 p-8 mt-10">
+        <h1 class="text-2xl font-semibold mb-6 text-gray-900">Comparador de IDs</h1>
+        
+        <p class="text-sm text-gray-600 mb-8">
+            Sube dos archivos de texto (.txt) que contengan un código ID por línea. 
+            La herramienta buscará los códigos que aparezcan en ambos archivos simultáneamente.
+        </p>
+
+        <!-- Mensaje de error (oculto por defecto) -->
+        <div id="errorMessage" class="hidden mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Archivo 1 -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Archivo 1</label>
+                <div class="flex items-center justify-center w-full">
+                    <label for="file1" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-8 h-8 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <p class="mb-2 text-sm text-gray-500 font-semibold" id="label-file1">Seleccionar TXT</p>
+                        </div>
+                        <input id="file1" type="file" accept=".txt" class="hidden" onchange="updateFileName('file1', 'label-file1')" />
+                    </label>
+                </div>
+            </div>
+
+            <!-- Archivo 2 -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Archivo 2</label>
+                <div class="flex items-center justify-center w-full">
+                    <label for="file2" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-8 h-8 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <p class="mb-2 text-sm text-gray-500 font-semibold" id="label-file2">Seleccionar TXT</p>
+                        </div>
+                        <input id="file2" type="file" accept=".txt" class="hidden" onchange="updateFileName('file2', 'label-file2')" />
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="compareFiles()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Comparar archivos
+        </button>
+
+        <!-- Resultados -->
+        <div id="resultsArea" class="hidden mt-8 border-t border-gray-200 pt-8">
+            <h2 class="text-xl font-semibold mb-4 text-gray-900">Resultados</h2>
+            
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+                    <p class="text-sm text-gray-500 mb-1">IDs Archivo 1</p>
+                    <p class="text-2xl font-bold text-gray-800" id="count1">0</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+                    <p class="text-sm text-gray-500 mb-1">IDs Archivo 2</p>
+                    <p class="text-2xl font-bold text-gray-800" id="count2">0</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg border border-red-200 text-center">
+                    <p class="text-sm text-red-600 mb-1">Códigos Cruzados</p>
+                    <p class="text-2xl font-bold text-red-700" id="countCrossed">0</p>
+                </div>
+            </div>
+
+            <div id="crossedDetails" class="hidden">
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-sm font-medium text-gray-700">Lista de IDs detectados en ambos archivos:</p>
+                    <button onclick="downloadResults()" class="text-sm bg-gray-800 hover:bg-gray-900 text-white px-3 py-1.5 rounded-md transition-colors">
+                        Descargar cruzados (.txt)
+                    </button>
+                </div>
+                <textarea id="crossedList" readonly class="w-full h-48 p-3 bg-gray-50 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none resize-none"></textarea>
+            </div>
+            
+            <div id="successMessage" class="hidden p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg text-center">
+                <p class="font-medium">Todo correcto. No se han encontrado códigos cruzados.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-auto pt-8 pb-4 text-center text-sm text-gray-400">
+        De Terriza para Movidis, Abril 2026
+    </footer>
+
+    <script>
+        let crossedIdsGlobal = [];
+
+        function updateFileName(inputId, labelId) {
+            const input = document.getElementById(inputId);
+            const label = document.getElementById(labelId);
+            if (input.files.length > 0) {
+                label.textContent = input.files[0].name;
+                label.classList.add('text-blue-600');
+            } else {
+                label.textContent = 'Seleccionar TXT';
+                label.classList.remove('text-blue-600');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+        }
+
+        async function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = e => reject(e);
+                reader.readAsText(file);
+            });
+        }
+
+        function extractIds(text) {
+            // Separa por saltos de línea, elimina espacios y asteriscos, e ignora líneas vacías
+            return text.split(/\r?\n/)
+                .map(line => line.replace(/[ *]/g, ''))
+                .filter(line => line.length > 0);
+        }
+
+        async function compareFiles() {
+            const file1 = document.getElementById('file1').files[0];
+            const file2 = document.getElementById('file2').files[0];
+
+            if (!file1 || !file2) {
+                showError('Por favor, selecciona ambos archivos antes de comparar.');
+                return;
+            }
+
+            try {
+                const text1 = await readFileContent(file1);
+                const text2 = await readFileContent(file2);
+
+                const ids1 = extractIds(text1);
+                const ids2 = extractIds(text2);
+
+                // Usar Set para una comparación de alto rendimiento
+                const set1 = new Set(ids1);
+                
+                // Encontrar intersección
+                const crossed = ids2.filter(id => set1.has(id));
+                // Eliminar duplicados dentro de la propia lista de cruzados por si un archivo tiene el mismo ID varias veces
+                crossedIdsGlobal = [...new Set(crossed)]; 
+
+                updateUI(ids1.length, ids2.length, crossedIdsGlobal);
+
+            } catch (error) {
+                showError('Hubo un error al leer los archivos. Comprueba que sean archivos de texto válidos.');
+                console.error(error);
+            }
+        }
+
+        function updateUI(count1, count2, crossedIds) {
+            document.getElementById('resultsArea').classList.remove('hidden');
+            
+            document.getElementById('count1').textContent = count1.toLocaleString('es-ES');
+            document.getElementById('count2').textContent = count2.toLocaleString('es-ES');
+            document.getElementById('countCrossed').textContent = crossedIds.length.toLocaleString('es-ES');
+
+            const crossedDetails = document.getElementById('crossedDetails');
+            const successMessage = document.getElementById('successMessage');
+            const textarea = document.getElementById('crossedList');
+
+            if (crossedIds.length > 0) {
+                successMessage.classList.add('hidden');
+                crossedDetails.classList.remove('hidden');
+                textarea.value = crossedIds.join('\n');
+            } else {
+                crossedDetails.classList.add('hidden');
+                successMessage.classList.remove('hidden');
+            }
+        }
+
+        function downloadResults() {
+            if (crossedIdsGlobal.length === 0) return;
+
+            const text = crossedIdsGlobal.join('\n');
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date().toISOString().slice(0,10);
+            a.download = `codigos_cruzados_${date}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
