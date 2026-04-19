@@ -34,10 +34,14 @@
                 <div class="flex items-center justify-center w-full">
                     <label for="file1" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                         <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                            <svg class="w-8 h-8 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <!-- Icono Nube (Subir) -->
+                            <svg id="svg-upload-1" class="w-8 h-8 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <!-- Icono Check (Completado) -->
+                            <svg id="svg-check-1" class="hidden w-8 h-8 mb-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            
                             <p class="mb-2 text-sm text-gray-500 font-semibold" id="label-file1">Seleccionar TXT</p>
                         </div>
-                        <input id="file1" type="file" accept=".txt" class="hidden" onchange="updateFileName('file1', 'label-file1')" />
+                        <input id="file1" type="file" accept=".txt" class="hidden" onchange="updateFileName('file1', 'label-file1', '1')" />
                     </label>
                 </div>
             </div>
@@ -48,10 +52,14 @@
                 <div class="flex items-center justify-center w-full">
                     <label for="file2" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                         <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                            <svg class="w-8 h-8 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <!-- Icono Nube (Subir) -->
+                            <svg id="svg-upload-2" class="w-8 h-8 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <!-- Icono Check (Completado) -->
+                            <svg id="svg-check-2" class="hidden w-8 h-8 mb-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            
                             <p class="mb-2 text-sm text-gray-500 font-semibold" id="label-file2">Seleccionar TXT</p>
                         </div>
-                        <input id="file2" type="file" accept=".txt" class="hidden" onchange="updateFileName('file2', 'label-file2')" />
+                        <input id="file2" type="file" accept=".txt" class="hidden" onchange="updateFileName('file2', 'label-file2', '2')" />
                     </label>
                 </div>
             </div>
@@ -103,11 +111,12 @@
     <script>
         let crossedIdsGlobal = [];
 
-        function updateFileName(inputId, labelId) {
+        function updateFileName(inputId, labelId, suffix) {
             const input = document.getElementById(inputId);
             const labelText = document.getElementById(labelId);
             const container = input.closest('label');
-            const svg = container.querySelector('svg');
+            const svgUpload = document.getElementById(`svg-upload-${suffix}`);
+            const svgCheck = document.getElementById(`svg-check-${suffix}`);
 
             if (input.files.length > 0) {
                 labelText.textContent = input.files[0].name;
@@ -117,10 +126,8 @@
                 container.classList.remove('bg-gray-50', 'border-gray-300', 'hover:bg-gray-100');
                 container.classList.add('bg-green-50', 'border-green-400', 'hover:bg-green-100');
                 
-                if (svg) {
-                    svg.classList.remove('text-gray-400');
-                    svg.classList.add('text-green-500');
-                }
+                svgUpload.classList.add('hidden');
+                svgCheck.classList.remove('hidden');
             } else {
                 labelText.textContent = 'Seleccionar TXT';
                 labelText.classList.remove('text-green-700', 'font-bold');
@@ -129,10 +136,8 @@
                 container.classList.add('bg-gray-50', 'border-gray-300', 'hover:bg-gray-100');
                 container.classList.remove('bg-green-50', 'border-green-400', 'hover:bg-green-100');
                 
-                if (svg) {
-                    svg.classList.add('text-gray-400');
-                    svg.classList.remove('text-green-500');
-                }
+                svgUpload.classList.remove('hidden');
+                svgCheck.classList.add('hidden');
             }
         }
 
