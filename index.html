@@ -105,13 +105,34 @@
 
         function updateFileName(inputId, labelId) {
             const input = document.getElementById(inputId);
-            const label = document.getElementById(labelId);
+            const labelText = document.getElementById(labelId);
+            const container = input.closest('label');
+            const svg = container.querySelector('svg');
+
             if (input.files.length > 0) {
-                label.textContent = input.files[0].name;
-                label.classList.add('text-blue-600');
+                labelText.textContent = input.files[0].name;
+                labelText.classList.remove('text-gray-500');
+                labelText.classList.add('text-green-700', 'font-bold');
+                
+                container.classList.remove('bg-gray-50', 'border-gray-300', 'hover:bg-gray-100');
+                container.classList.add('bg-green-50', 'border-green-400', 'hover:bg-green-100');
+                
+                if (svg) {
+                    svg.classList.remove('text-gray-400');
+                    svg.classList.add('text-green-500');
+                }
             } else {
-                label.textContent = 'Seleccionar TXT';
-                label.classList.remove('text-blue-600');
+                labelText.textContent = 'Seleccionar TXT';
+                labelText.classList.remove('text-green-700', 'font-bold');
+                labelText.classList.add('text-gray-500');
+                
+                container.classList.add('bg-gray-50', 'border-gray-300', 'hover:bg-gray-100');
+                container.classList.remove('bg-green-50', 'border-green-400', 'hover:bg-green-100');
+                
+                if (svg) {
+                    svg.classList.add('text-gray-400');
+                    svg.classList.remove('text-green-500');
+                }
             }
         }
 
